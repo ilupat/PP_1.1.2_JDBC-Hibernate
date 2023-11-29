@@ -1,5 +1,12 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -19,6 +26,26 @@ public class Util {
             throw new RuntimeException(e);
         }
         return connection;
+    }
+
+    public static SessionFactory getConnection() {
+        SessionFactory sessionFactory = null;
+        try {
+            Configuration configuration = new Configuration()
+                    .setProperty("hibernate.connection.driver_class", DATABASE_DRIVE)
+                    .setProperty("hibernate.connection.url", DATABASE_URL)
+                    .setProperty("hibernate.connection.username", USERNAME)
+                    .setProperty("hibernate.connection.password", PASSWORD)
+                    .setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect")
+                    .addAnnotatedClass(User.class);
+
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties()).build();
+            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        } catch (HibernateException e) {
+            e.printStackTrace();
+        }
+        return sessionFactory;
     }
 
 }
